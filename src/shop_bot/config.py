@@ -17,5 +17,8 @@ class Settings(BaseSettings):
     default_max_price: float = 35.0
     support_username: str = '@support'
 
+    public_base_url: str | None = None
+    telegram_webhook_secret: str | None = None
+
 
 settings = Settings()

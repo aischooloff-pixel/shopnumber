@@ -19,12 +19,8 @@ logging.basicConfig(level=logging.INFO)
 store = MemoryStore()
 
 
-def build_app() -> tuple[Bot, Dispatcher]:
-    bot = Bot(token=settings.telegram_bot_token)
+def create_dispatcher(tiger: TigerSMSClient, crypto: CryptoBotClient) -> Dispatcher:
     dp = Dispatcher()
-
-    tiger = TigerSMSClient(settings.tiger_base_url, settings.tiger_api_key)
-    crypto = CryptoBotClient(settings.cryptobot_base_url, settings.cryptobot_api_token)
 
     @dp.message(CommandStart())
     async def start(message: Message) -> None:
@@ -160,11 +156,19 @@ def build_app() -> tuple[Bot, Dispatcher]:
         await callback.answer()
         await callback.message.answer(f'Поддержка: {settings.support_username}')
 
+    return dp
+
+
+def build_bot_and_dispatcher() -> tuple[Bot, Dispatcher]:
+    bot = Bot(token=settings.telegram_bot_token)
+    tiger = TigerSMSClient(settings.tiger_base_url, settings.tiger_api_key)
+    crypto = CryptoBotClient(settings.cryptobot_base_url, settings.cryptobot_api_token)
+    dp = create_dispatcher(tiger=tiger, crypto=crypto)
     return bot, dp
 
 
 async def main() -> None:
-    bot, dp = build_app()
+    bot, dp = build_bot_and_dispatcher()
     await dp.start_polling(bot)
 
 
